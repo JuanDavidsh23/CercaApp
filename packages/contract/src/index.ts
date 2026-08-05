@@ -1,14 +1,7 @@
-/**
- * @cerca/contract
- *
- * Shared types, branded types, and Zod schemas
- * consumed by the mobile app.
- *
- * This package will be populated in Phase 2 with:
- * - Actor, Capacity, PlatformRole
- * - Money, Pricing
- * - ListingStatus, BookingStatus
- * - Permission matrix
- * - Review policy
- * - API endpoint contracts
- */
+export * from './actor';
+export * from './money';
+export * from './permissions';
+export * from './policies';
+export * from './pricing';
+export * from './status';
+export * from './utils';
