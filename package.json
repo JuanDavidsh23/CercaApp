@@ -1,0 +1,34 @@
+{
+  "name": "cerca",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "verify": "bash scripts/verify.sh",
+    "typecheck": "npm run typecheck --workspace=apps/mobile",
+    "lint": "npm run lint --workspace=apps/mobile",
+    "format:check": "prettier --check .",
+    "format": "prettier --write .",
+    "mobile:start": "npm run start --workspace=apps/mobile",
+    "mobile:android": "npm run android --workspace=apps/mobile",
+    "mobile:ios": "npm run ios --workspace=apps/mobile",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "prettier": "^3.5.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.2"
+  },
+  "lint-staged": {
+    "apps/mobile/**/*.{ts,tsx}": [
+      "eslint --fix --config apps/mobile/eslint.config.mjs",
+      "prettier --write"
+    ],
+    "*.{json,md,css}": [
+      "prettier --write"
+    ]
+  }
+}

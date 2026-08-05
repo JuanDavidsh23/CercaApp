@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "Cerca",
+    "slug": "cerca",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "cerca",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "app.cerca.mobile",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "app.cerca.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#0F172A",
+        "foregroundImage": "./assets/images/icon.png"
+      }
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Cerca uses your location to find nearby services.",
+          "locationWhenInUsePermission": "Cerca uses your location to find nearby services."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0F172A",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
