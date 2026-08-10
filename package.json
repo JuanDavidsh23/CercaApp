@@ -6,6 +6,9 @@
     "apps/*",
     "packages/*"
   ],
+  "overrides": {
+    "react": "19.2.3"
+  },
   "scripts": {
     "verify": "bash scripts/verify.sh",
     "typecheck": "npm run typecheck --workspace=apps/mobile",

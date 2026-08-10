@@ -1,7 +1,6 @@
-@import "tailwindcss/theme.css" layer(theme);
-@import "tailwindcss/preflight.css" layer(base);
-@import "tailwindcss/utilities.css";
-@import "nativewind/theme";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /*
  * Cerca Design System — Semantic Tokens
@@ -25,54 +24,6 @@
  * Interactive:
  *   min-h-touch (44px minimum touch target)
  */
-
-@theme {
-  /* Brand */
-  --color-brand: #6366f1;
-  --color-brand-light: #818cf8;
-  --color-brand-dark: #4338ca;
-
-  /* Surfaces */
-  --color-surface: #ffffff;
-  --color-surface-alt: #f8fafc;
-  --color-surface-elevated: #ffffff;
-
-  /* Text */
-  --color-primary: #0f172a;
-  --color-secondary: #64748b;
-  --color-tertiary: #94a3b8;
-  --color-inverse: #ffffff;
-
-  /* Borders */
-  --color-default: #e2e8f0;
-  --color-strong: #cbd5e1;
-
-  /* Status — Listing */
-  --color-status-draft: #94a3b8;
-  --color-status-published: #22c55e;
-  --color-status-paused: #f59e0b;
-  --color-status-under-review: #f97316;
-  --color-status-removed: #ef4444;
-
-  /* Status — Booking */
-  --color-status-requested: #6366f1;
-  --color-status-accepted: #22c55e;
-  --color-status-declined: #ef4444;
-  --color-status-completed: #0ea5e9;
-  --color-status-cancelled: #94a3b8;
-
-  /* Feedback */
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
-  --color-info: #0ea5e9;
-
-  /* Rating */
-  --color-star: #fbbf24;
-
-  /* Spacing — touch target */
-  --spacing-touch: 44px;
-}
 
 @layer base {
   :root {

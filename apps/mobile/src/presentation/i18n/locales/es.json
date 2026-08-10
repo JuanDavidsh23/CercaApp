@@ -1,0 +1,54 @@
+{
+  "common": {
+    "brand": "Cerca",
+    "or": "o continúa con",
+    "loading": "Cargando..."
+  },
+  "auth": {
+    "signIn": {
+      "title": "Iniciar sesión",
+      "subtitle": "¡Bienvenido de nuevo a Cerca! Ingresa tus datos.",
+      "emailLabel": "Correo",
+      "emailPlaceholder": "Ingresa tu correo",
+      "passwordLabel": "Contraseña",
+      "passwordPlaceholder": "Ingresa tu contraseña",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "submit": "Iniciar sesión",
+      "google": "Google",
+      "apple": "Apple",
+      "noAccount": "¿No tienes cuenta?",
+      "signUpLink": "Regístrate"
+    },
+    "signUp": {
+      "title": "Crear cuenta",
+      "subtitle": "Crea tu cuenta en Cerca",
+      "placeholder": "El formulario de registro llegará pronto",
+      "hasAccount": "¿Ya tienes cuenta?",
+      "signInLink": "Inicia sesión"
+    }
+  },
+  "search": {
+    "title": "Descubre",
+    "subtitle": "Encuentra los mejores servicios cerca de ti",
+    "placeholder": "Buscar servicios, profesionales...",
+    "empty": "No se encontraron servicios",
+    "categories": {
+      "all": "Todos",
+      "plumbing": "Plomería",
+      "electrical": "Electricidad",
+      "cleaning": "Limpieza",
+      "tutoring": "Tutoría",
+      "pets": "Mascotas"
+    }
+  },
+  "listings": {
+    "mock": {
+      "pipeRepair": "Reparación de tuberías",
+      "electricalInstall": "Instalación eléctrica",
+      "deepCleaning": "Limpieza profunda",
+      "mathTutoring": "Clases de matemáticas",
+      "dogWalking": "Paseo de perros",
+      "drainClearing": "Destape de drenajes"
+    }
+  }
+}

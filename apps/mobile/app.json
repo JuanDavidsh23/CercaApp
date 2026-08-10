@@ -4,7 +4,6 @@
     "slug": "cerca",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
     "scheme": "cerca",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -14,13 +13,11 @@
     "android": {
       "package": "app.cerca.mobile",
       "adaptiveIcon": {
-        "backgroundColor": "#0F172A",
-        "foregroundImage": "./assets/images/icon.png"
+        "backgroundColor": "#0F172A"
       }
     },
     "web": {
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "output": "static"
     },
     "plugins": [
       "expo-router",
@@ -35,14 +32,13 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#0F172A",
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200
+          "backgroundColor": "#0F172A"
         }
       ]
     ],
     "experiments": {
-      "typedRoutes": true
+      "typedRoutes": true,
+      "tsconfigPaths": true
     }
   }
 }

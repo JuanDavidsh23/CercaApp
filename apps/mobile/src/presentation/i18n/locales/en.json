@@ -1,0 +1,54 @@
+{
+  "common": {
+    "brand": "Cerca",
+    "or": "or continue with",
+    "loading": "Loading..."
+  },
+  "auth": {
+    "signIn": {
+      "title": "Sign In",
+      "subtitle": "Welcome back to Cerca! Please enter your details.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "Enter your email",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign In",
+      "google": "Google",
+      "apple": "Apple",
+      "noAccount": "Don't have an account?",
+      "signUpLink": "Sign up"
+    },
+    "signUp": {
+      "title": "Sign Up",
+      "subtitle": "Create your Cerca account",
+      "placeholder": "Registration form coming soon",
+      "hasAccount": "Already have an account?",
+      "signInLink": "Sign in"
+    }
+  },
+  "search": {
+    "title": "Discover",
+    "subtitle": "Find the best services near you",
+    "placeholder": "Search services, professionals...",
+    "empty": "No services found",
+    "categories": {
+      "all": "All",
+      "plumbing": "Plumbing",
+      "electrical": "Electrical",
+      "cleaning": "Cleaning",
+      "tutoring": "Tutoring",
+      "pets": "Pets"
+    }
+  },
+  "listings": {
+    "mock": {
+      "pipeRepair": "Pipe Repair",
+      "electricalInstall": "Electrical Installation",
+      "deepCleaning": "Deep Cleaning",
+      "mathTutoring": "Math Tutoring",
+      "dogWalking": "Dog Walking",
+      "drainClearing": "Drain Clearing"
+    }
+  }
+}

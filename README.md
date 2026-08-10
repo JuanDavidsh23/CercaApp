@@ -18,6 +18,18 @@ npm install
 npm run mobile:start
 ```
 
+Para Android Emulator (Windows), usa el script dedicado que apunta Metro a `10.0.2.2`:
+
+```bash
+npm run mobile:android
+```
+
+Si Expo Go se queda en carga, ejecuta una vez:
+
+```bash
+adb reverse tcp:8081 tcp:8081
+```
+
 ### Verification
 
 ```bash
