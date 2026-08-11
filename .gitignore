@@ -37,6 +37,6 @@ Thumbs.db
 android/
 ios/
 
-# Lock file (use npm)
+# Lock files (use pnpm)
+package-lock.json
 yarn.lock
-pnpm-lock.yaml

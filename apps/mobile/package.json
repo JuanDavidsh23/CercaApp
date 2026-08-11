@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@cerca/contract": "^1.0.0",
+    "@cerca/contract": "workspace:*",
     "@react-navigation/native": "^7.3.14",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -46,7 +46,7 @@
   },
   "scripts": {
     "start": "expo start",
-    "android": "powershell -ExecutionPolicy Bypass -File ./scripts/start-android.ps1",
+    "android": "bash ./scripts/start-android.sh",
     "ios": "expo start --ios",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",

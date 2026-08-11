@@ -2,22 +2,18 @@
   "name": "cerca",
   "version": "1.0.0",
   "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
   "overrides": {
     "react": "19.2.3"
   },
   "scripts": {
     "verify": "bash scripts/verify.sh",
-    "typecheck": "npm run typecheck --workspace=apps/mobile",
-    "lint": "npm run lint --workspace=apps/mobile",
+    "typecheck": "pnpm --filter @cerca/mobile typecheck",
+    "lint": "pnpm --filter @cerca/mobile lint",
     "format:check": "prettier --check .",
     "format": "prettier --write .",
-    "mobile:start": "npm run start --workspace=apps/mobile",
-    "mobile:android": "npm run android --workspace=apps/mobile",
-    "mobile:ios": "npm run ios --workspace=apps/mobile",
+    "mobile:start": "pnpm --filter @cerca/mobile start",
+    "mobile:android": "pnpm --filter @cerca/mobile android",
+    "mobile:ios": "pnpm --filter @cerca/mobile ios",
     "prepare": "husky"
   },
   "devDependencies": {

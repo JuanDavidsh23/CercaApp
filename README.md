@@ -14,14 +14,14 @@ This project follows Clean Architecture with four layers:
 ### Quick Start
 
 ```bash
-npm install
-npm run mobile:start
+pnpm install
+pnpm mobile:start
 ```
 
 Para Android Emulator (Windows), usa el script dedicado que apunta Metro a `10.0.2.2`:
 
 ```bash
-npm run mobile:android
+pnpm mobile:android
 ```
 
 Si Expo Go se queda en carga, ejecuta una vez:
