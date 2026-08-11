@@ -6,6 +6,7 @@ import { Mail, Lock } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { Input } from "@/presentation/components/ui/Input";
 import { Button } from "@/presentation/components/ui/Button";
+import { signInApi } from "@/infrastructure/api/auth";
 
 export default function SignInScreen() {
   const router = useRouter();
@@ -13,14 +14,52 @@ export default function SignInScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSignIn = () => {
+  // Maneja el inicio de sesión estricto contra la API del Backend
+  const handleSignIn = async () => {
+    if (!email.trim() || !password.trim()) {
+      setErrorMessage("Por favor ingresa tu correo y contraseña.");
+      return;
+    }
+
     setIsLoading(true);
-    // Simulate API call for Phase 3
-    setTimeout(() => {
+    setErrorMessage(null);
+
+    try {
+      // Intenta autenticarse contra la API del backend real
+      await signInApi({ email: email.trim(), password });
       setIsLoading(false);
+      // Redirige ÚNICAMENTE si la autenticación fue exitosa
       router.replace("/(app)/search");
-    }, 1000);
+    } catch (err: unknown) {
+      setIsLoading(false);
+      const rawMessage = err instanceof Error ? err.message : "Error al iniciar sesión";
+      console.error("[Login Error]:", err);
+
+      // Formatea mensajes de error comunes para una respuesta clara en interfaz
+      if (
+        rawMessage.includes("Network request failed") ||
+        rawMessage.includes("Fetch") ||
+        rawMessage.includes("Failed to connect")
+      ) {
+        setErrorMessage(
+          "No se pudo conectar al servidor API (http://10.0.2.2:3333/v1). Asegúrate de que el Backend esté escuchando en el puerto 3333.",
+        );
+      } else if (
+        rawMessage.includes("401") ||
+        rawMessage.includes("Unauthorized") ||
+        rawMessage.includes("invalid")
+      ) {
+        setErrorMessage("Credenciales incorrectas. Revisa tu correo y contraseña.");
+      } else if (rawMessage.includes("invalid_string") || rawMessage.includes("email")) {
+        setErrorMessage(
+          "Por favor ingresa un correo electrónico válido (ejemplo@dominio.com).",
+        );
+      } else {
+        setErrorMessage(rawMessage);
+      }
+    }
   };
 
   return (
@@ -45,7 +84,17 @@ export default function SignInScreen() {
             <Text className="text-secondary text-base">{t("auth.signIn.subtitle")}</Text>
           </View>
 
+          {/* Caja de mensaje de error cuando falla la autenticación */}
+          {errorMessage ? (
+            <View className="bg-red-50 border border-red-200 rounded-xl p-3.5 mb-4">
+              <Text className="text-red-700 text-xs font-semibold text-center leading-5">
+                {errorMessage}
+              </Text>
+            </View>
+          ) : null}
+
           <View className="mb-6">
+            {/* Campo para ingresar el correo electrónico */}
             <Input
               label={t("auth.signIn.emailLabel")}
               placeholder={t("auth.signIn.emailPlaceholder")}
@@ -58,10 +107,11 @@ export default function SignInScreen() {
               icon={<Mail size={20} color="#94a3b8" />}
             />
 
+            {/* Campo para la contraseña con botón de ojito activado (isPassword) */}
             <Input
               label={t("auth.signIn.passwordLabel")}
               placeholder={t("auth.signIn.passwordPlaceholder")}
-              secureTextEntry
+              isPassword
               autoComplete="password"
               textContentType="password"
               value={password}
@@ -79,7 +129,7 @@ export default function SignInScreen() {
 
             <Button
               label={t("auth.signIn.submit")}
-              onPress={handleSignIn}
+              onPress={() => void handleSignIn()}
               isLoading={isLoading}
             />
           </View>

@@ -23,7 +23,7 @@
   },
   "lint-staged": {
     "apps/mobile/**/*.{ts,tsx}": [
-      "eslint --fix --config apps/mobile/eslint.config.mjs",
+      "pnpm --filter @cerca/mobile exec eslint --fix",
       "prettier --write"
     ],
     "*.{json,md,css}": [

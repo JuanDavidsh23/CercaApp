@@ -42,6 +42,15 @@
     }
   },
   "listings": {
+    "detail": {
+      "back": "Volver a la búsqueda",
+      "book": "Reservar servicio",
+      "provider": "Proveedor",
+      "rating": "Calificación",
+      "price": "Precio",
+      "description": "Descripción del servicio",
+      "specifications": "Especificaciones del servicio"
+    },
     "mock": {
       "pipeRepair": "Reparación de tuberías",
       "electricalInstall": "Instalación eléctrica",
@@ -50,5 +59,9 @@
       "dogWalking": "Paseo de perros",
       "drainClearing": "Destape de drenajes"
     }
+  },
+  "nav": {
+    "backToLogin": "Volver al Login",
+    "signOut": "Cerrar sesión"
   }
 }
