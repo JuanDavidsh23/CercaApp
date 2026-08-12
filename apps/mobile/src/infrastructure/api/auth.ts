@@ -1,88 +1,74 @@
-import { z } from "zod";
 import {
+  actorResponseSchema,
   authResultSchema,
   signInSchema,
   signUpSchema,
+  type ActorResponse,
   type AuthResult,
   type SignInInput,
   type SignUpInput,
 } from "@cerca/contract";
 import { apiFetch } from "./client";
-import { saveTokens, clearTokens } from "../storage/tokenStorage";
+import { saveTokens, clearTokens, getRefreshToken } from "../storage/tokenStorage";
 
-const fallbackTokensSchema = z.object({
-  accessToken: z.string(),
-  refreshToken: z.string(),
-});
-
-/**
- * Inicia sesión contra la API del backend real
- */
+/** POST /auth/sign-in — inicia sesión y guarda los tokens en el almacén seguro. */
 export async function signInApi(input: SignInInput): Promise<AuthResult> {
-  // Valida la entrada antes de enviar
   const validatedInput = signInSchema.parse(input);
 
-  const rawData = await apiFetch("/auth/sign-in", {
+  const raw = await apiFetch("/auth/sign-in", {
     method: "POST",
-    body: JSON.stringify(validatedInput),
+    body: validatedInput,
     requiresAuth: false,
   });
 
-  // Valida la respuesta de la API con Zod (Rule: Zod at the boundary)
-  const parsed = authResultSchema.safeParse(rawData);
-  if (parsed.success) {
-    await saveTokens(parsed.data.accessToken, parsed.data.refreshToken);
-    return parsed.data;
-  }
-
-  // Fallback si la API devolvió tokens pero la estructura de actor difiere ligeramente
-  const fallbackParsed = fallbackTokensSchema.safeParse(rawData);
-  if (fallbackParsed.success) {
-    const { accessToken, refreshToken } = fallbackParsed.data;
-    await saveTokens(accessToken, refreshToken);
-    return {
-      accessToken,
-      refreshToken,
-      actor: {
-        id: "00000000-0000-0000-0000-000000000000",
-        capacities: ["customer"],
-        platformRole: "user",
-      },
-    };
-  }
-
-  throw new Error("Respuesta de autenticación inválida del servidor");
+  const result = authResultSchema.parse(raw);
+  await saveTokens(result.accessToken, result.refreshToken);
+  return result;
 }
 
-/**
- * Registra un nuevo usuario contra la API del backend real
- */
+/** POST /auth/sign-up — crea la cuenta y deja la sesión iniciada. */
 export async function signUpApi(input: SignUpInput): Promise<AuthResult> {
   const validatedInput = signUpSchema.parse(input);
 
-  const rawData = await apiFetch("/auth/sign-up", {
+  const raw = await apiFetch("/auth/sign-up", {
     method: "POST",
-    body: JSON.stringify(validatedInput),
+    body: validatedInput,
     requiresAuth: false,
   });
 
-  const authResult = authResultSchema.parse(rawData);
-  await saveTokens(authResult.accessToken, authResult.refreshToken);
-
-  return authResult;
+  const result = authResultSchema.parse(raw);
+  await saveTokens(result.accessToken, result.refreshToken);
+  return result;
 }
 
 /**
- * Cierra sesión revocando el token de refresco en la API
+ * POST /auth/sign-out — revoca el refresh token en el servidor.
+ * Los tokens locales se borran pase lo que pase: si el servidor no responde,
+ * lo peor que puede ocurrir es que el token caduque solo, pero el teléfono
+ * nunca se queda con una sesión abierta que el usuario creía cerrada.
  */
-export async function signOutApi(refreshToken: string): Promise<void> {
+export async function signOutApi(): Promise<void> {
   try {
-    await apiFetch("/auth/sign-out", {
-      method: "POST",
-      body: JSON.stringify({ refreshToken }),
-    });
+    const refreshToken = await getRefreshToken();
+    if (refreshToken !== null) {
+      await apiFetch("/auth/sign-out", {
+        method: "POST",
+        body: { refreshToken },
+      });
+    }
   } finally {
-    // Asegura limpiar los tokens locales siempre
     await clearTokens();
   }
+}
+
+/** GET /me — quién soy, según el servidor. Es la única fuente de verdad del actor. */
+export async function getMeApi(): Promise<ActorResponse> {
+  const raw = await apiFetch("/me");
+  return actorResponseSchema.parse(raw);
+}
+
+/** POST /me/capacities/provider — añade la capacidad de proveedor a mi cuenta. */
+export async function becomeProviderApi(): Promise<ActorResponse> {
+  const raw = await apiFetch("/me/capacities/provider", { method: "POST" });
+  return actorResponseSchema.parse(raw);
 }

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Eye, EyeOff } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 import { cn } from "../../lib/cn";
 
 export interface InputProps extends TextInputProps {
@@ -25,6 +26,7 @@ export function Input({
   className,
   ...props
 }: InputProps) {
+  const { t } = useTranslation();
   // Estado para controlar si el input está enfocado (cambia el color del borde)
   const [isFocused, setIsFocused] = useState(false);
   // Estado para alternar la visibilidad de la contraseña (mostrar/ocultar texto)
@@ -69,7 +71,7 @@ export function Input({
             onPress={() => setIsPasswordVisible(!isPasswordVisible)}
             className="p-1 ml-2"
             accessibilityLabel={
-              isPasswordVisible ? "Ocultar contraseña" : "Mostrar contraseña"
+              isPasswordVisible ? t("input.hidePassword") : t("input.showPassword")
             }
           >
             {isPasswordVisible ? (

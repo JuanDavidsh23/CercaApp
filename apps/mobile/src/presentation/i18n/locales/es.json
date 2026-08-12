@@ -1,8 +1,8 @@
 {
   "common": {
     "brand": "Cerca",
-    "or": "o continúa con",
-    "loading": "Cargando..."
+    "loading": "Cargando...",
+    "cancel": "Cancelar"
   },
   "auth": {
     "signIn": {
@@ -12,19 +12,28 @@
       "emailPlaceholder": "Ingresa tu correo",
       "passwordLabel": "Contraseña",
       "passwordPlaceholder": "Ingresa tu contraseña",
-      "forgotPassword": "¿Olvidaste tu contraseña?",
       "submit": "Iniciar sesión",
-      "google": "Google",
-      "apple": "Apple",
       "noAccount": "¿No tienes cuenta?",
       "signUpLink": "Regístrate"
     },
     "signUp": {
       "title": "Crear cuenta",
       "subtitle": "Crea tu cuenta en Cerca",
-      "placeholder": "El formulario de registro llegará pronto",
+      "nameLabel": "Nombre",
+      "namePlaceholder": "¿Cómo te llamas?",
+      "passwordPlaceholder": "Mínimo 8 caracteres",
+      "accountTypeLabel": "¿Qué quieres hacer en Cerca?",
+      "accountType": {
+        "customer": "Contratar servicios",
+        "provider": "Ofrecer servicios"
+      },
+      "submit": "Crear cuenta",
       "hasAccount": "¿Ya tienes cuenta?",
       "signInLink": "Inicia sesión"
+    },
+    "errors": {
+      "emptyFields": "Completa todos los campos.",
+      "passwordTooShort": "La contraseña debe tener al menos 8 caracteres."
     }
   },
   "search": {
@@ -32,36 +41,165 @@
     "subtitle": "Encuentra los mejores servicios cerca de ti",
     "placeholder": "Buscar servicios, profesionales...",
     "empty": "No se encontraron servicios",
+    "distanceMeters": "a {{value}} m",
+    "distanceKm": "a {{value}} km",
     "categories": {
-      "all": "Todos",
-      "plumbing": "Plomería",
-      "electrical": "Electricidad",
-      "cleaning": "Limpieza",
-      "tutoring": "Tutoría",
-      "pets": "Mascotas"
+      "all": "Todas"
     }
   },
   "listings": {
-    "detail": {
-      "back": "Volver a la búsqueda",
-      "book": "Reservar servicio",
-      "provider": "Proveedor",
-      "rating": "Calificación",
-      "price": "Precio",
-      "description": "Descripción del servicio",
-      "specifications": "Especificaciones del servicio"
+    "priceOnRequest": "Precio a convenir",
+    "pricing": {
+      "hourly": "{{amount}} / hora · mínimo {{hours}} h",
+      "quoteFrom": "Desde {{amount}}"
     },
-    "mock": {
-      "pipeRepair": "Reparación de tuberías",
-      "electricalInstall": "Instalación eléctrica",
-      "deepCleaning": "Limpieza profunda",
-      "mathTutoring": "Clases de matemáticas",
-      "dogWalking": "Paseo de perros",
-      "drainClearing": "Destape de drenajes"
+    "status": {
+      "draft": "Borrador",
+      "published": "Publicado",
+      "paused": "Pausado",
+      "under_review": "En revisión",
+      "removed": "Retirado"
+    },
+    "detail": {
+      "back": "Volver",
+      "book": "Reservar servicio",
+      "description": "Descripción del servicio",
+      "reviews": "Reseñas",
+      "noReviews": "Todavía no tiene reseñas"
+    }
+  },
+  "bookings": {
+    "title": "Mis reservas",
+    "subtitle": "Lo que has pedido y lo que te han pedido",
+    "empty": "Aquí no hay reservas todavía",
+    "actionFailed": "No se pudo completar la acción",
+    "scheduledFor": "Agendada para el {{date}}",
+    "roles": {
+      "customer": "Las que pedí",
+      "provider": "Las que me pidieron"
+    },
+    "status": {
+      "requested": "Solicitada",
+      "accepted": "Aceptada",
+      "declined": "Rechazada",
+      "completed": "Completada",
+      "cancelled": "Cancelada"
+    },
+    "accept": {
+      "title": "Aceptar la reserva",
+      "message": "¿Cuándo prestarás el servicio?",
+      "inDays_one": "Mañana",
+      "inDays_other": "En {{count}} días"
+    },
+    "decline": {
+      "title": "Rechazar la reserva",
+      "message": "¿Por qué la rechazas?",
+      "reasons": {
+        "unavailable": "No tengo disponibilidad",
+        "not_a_fit": "No es lo que ofrezco",
+        "other": "Otro motivo"
+      }
+    },
+    "actions": {
+      "accept": "Aceptar",
+      "decline": "Rechazar",
+      "complete": "Marcar como completada",
+      "cancel": "Cancelar",
+      "review": "Escribir reseña"
+    }
+  },
+  "reviews": {
+    "title": "Escribir una reseña",
+    "subtitle": "Cuenta cómo te fue con este servicio",
+    "ratingLabel": "Tu calificación",
+    "starLabel_one": "{{count}} estrella",
+    "starLabel_other": "{{count}} estrellas",
+    "bodyLabel": "Tu comentario",
+    "bodyPlaceholder": "¿Qué tal estuvo el servicio?",
+    "submit": "Publicar reseña",
+    "errors": {
+      "emptyBody": "Escribe un comentario antes de publicar."
+    }
+  },
+  "provider": {
+    "title": "Área de proveedor",
+    "actionFailed": "No se pudo completar la acción",
+    "actions": {
+      "publish": "Publicar",
+      "pause": "Pausar"
+    },
+    "myListings": {
+      "title": "Mis anuncios",
+      "subtitle": "Gestiona los servicios que ofreces",
+      "create": "+ Crear anuncio",
+      "empty": "Todavía no has creado ningún anuncio"
+    },
+    "newListing": {
+      "title": "Crear anuncio",
+      "subtitle": "Se guardará como borrador; tú decides cuándo publicarlo",
+      "categoryLabel": "Categoría",
+      "titleLabel": "Título",
+      "titlePlaceholder": "Ej.: Reparación de tuberías",
+      "descriptionLabel": "Descripción",
+      "descriptionPlaceholder": "Explica qué incluye tu servicio",
+      "pricingLabel": "Cómo cobras",
+      "pricingModels": {
+        "fixed": "Precio fijo",
+        "hourly": "Por hora",
+        "quote": "A convenir"
+      },
+      "amountLabel": "Importe",
+      "amountPlaceholder": "Ej.: 45000",
+      "minimumHoursLabel": "Horas mínimas",
+      "locationFallback": "Sin permiso de ubicación: el anuncio se publicará en el centro de Medellín.",
+      "submit": "Crear anuncio",
+      "errors": {
+        "noCategory": "Elige una categoría.",
+        "incomplete": "El título necesita al menos 3 caracteres y la descripción no puede estar vacía.",
+        "badPricing": "Revisa el importe. Las horas mínimas van de 1 a 12."
+      }
     }
   },
   "nav": {
-    "backToLogin": "Volver al Login",
-    "signOut": "Cerrar sesión"
+    "signOut": "Cerrar sesión",
+    "bookings": "Mis reservas",
+    "myListings": "Mis anuncios"
+  },
+  "input": {
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña"
+  },
+  "errors": {
+    "unknown": "Algo salió mal. Inténtalo de nuevo.",
+    "network": "No se pudo conectar con el servidor. Comprueba que la API esté encendida y que la dirección sea la correcta.",
+    "reason": {
+      "not_your_booking": "Esta reserva no es tuya.",
+      "not_completed": "Podrás reseñar cuando el servicio esté completado.",
+      "already_reviewed": "Ya escribiste una reseña de esta reserva.",
+      "window_closed": "El plazo de 30 días para reseñar ya pasó.",
+      "own_listing": "No puedes reservar tu propio anuncio.",
+      "not_bookable": "Este anuncio no está disponible para reservar.",
+      "not_participant": "No participas en esta reserva.",
+      "not_cancellable": "Esta reserva ya no se puede cancelar."
+    },
+    "code": {
+      "INVALID_CREDENTIALS": "Correo o contraseña incorrectos.",
+      "EMAIL_TAKEN": "Ya existe una cuenta con ese correo.",
+      "VALIDATION_ERROR": "Hay datos inválidos. Revisa el formulario.",
+      "UNAUTHENTICATED": "Tu sesión expiró. Vuelve a iniciar sesión.",
+      "MISSING_CAPABILITY": "Tu cuenta no tiene permiso para hacer esto.",
+      "ACCOUNT_SUSPENDED": "Tu cuenta está suspendida.",
+      "LISTING_NOT_FOUND": "Este anuncio ya no existe.",
+      "LISTING_REMOVED": "Este anuncio fue retirado.",
+      "NOT_LISTING_OWNER": "Este anuncio no es tuyo.",
+      "BOOKING_NOT_FOUND": "Esta reserva ya no existe.",
+      "BOOKING_NOT_ALLOWED": "No puedes reservar este servicio.",
+      "INVALID_BOOKING_STATE": "La reserva ya cambió de estado. Actualiza la pantalla.",
+      "CANCEL_NOT_ALLOWED": "Esta reserva ya no se puede cancelar.",
+      "REVIEW_ALREADY_EXISTS": "Ya escribiste una reseña de esta reserva.",
+      "REVIEW_BLOCKED": "Todavía no puedes reseñar esta reserva.",
+      "IDEMPOTENCY_IN_PROGRESS": "Esa acción ya se está procesando. Espera un momento.",
+      "INTERNAL_ERROR": "El servidor tuvo un problema. Inténtalo más tarde."
+    }
   }
 }

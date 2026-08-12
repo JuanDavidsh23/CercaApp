@@ -1,12 +1,18 @@
-import { Stack } from "expo-router";
+import { Redirect, Stack } from "expo-router";
 import { useTranslation } from "react-i18next";
+import { useSession } from "@/presentation/session/SessionProvider";
 
 /**
- * Auth layout — wraps sign-in and sign-up screens.
- * In Phase 3, this will redirect authenticated users away.
+ * Pantallas de entrada (iniciar sesión / registro).
+ * Si ya hay sesión no tiene sentido mostrarlas: vamos directo a la búsqueda.
  */
 export default function AuthLayout() {
   const { t } = useTranslation();
+  const { actor, isLoading } = useSession();
+
+  if (!isLoading && actor !== null) {
+    return <Redirect href="/(app)/search" />;
+  }
 
   return (
     <Stack

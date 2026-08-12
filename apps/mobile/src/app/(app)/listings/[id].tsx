@@ -1,129 +1,83 @@
-import React from "react";
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import {
-  ArrowLeft,
-  Star,
-  ShieldCheck,
-  Clock,
-  MapPin,
-  User,
-  LogOut,
-} from "lucide-react-native";
+import { ArrowLeft, Star } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
-import { formatMoney, type Money } from "@cerca/contract";
+import { canBookListing } from "@/application/listing/can-book-listing";
 import { localeForLanguage } from "@/presentation/i18n";
 import { Button } from "@/presentation/components/ui/Button";
+import { useListingDetail } from "@/presentation/hooks/useListings";
+import { useListingReviews } from "@/presentation/hooks/useReviews";
+import { useCreateBooking } from "@/presentation/hooks/useBookings";
+import { usePricingLabel } from "@/presentation/hooks/usePricingLabel";
+import { useApiErrorMessage } from "@/presentation/hooks/useApiErrorMessage";
+import { useSession } from "@/presentation/session/SessionProvider";
 
-interface MockServiceDetail {
-  id: string;
-  titleKey: string;
-  providerName: string;
-  price: Money;
-  rating: number;
-  category: string;
-  descriptionKey: string;
-  responseTime: string;
-  location: string;
-}
-
-const DEFAULT_SERVICE: MockServiceDetail = {
-  id: "1",
-  titleKey: "listings.mock.pipeRepair",
-  providerName: "Carlos Pérez",
-  price: { amountMinor: 4500, currency: "USD" },
-  rating: 4.8,
-  category: "Plomería",
-  descriptionKey:
-    "Reparación profesional de tuberías, fugas de agua y problemas de plomería residencial con garantía de servicio.",
-  responseTime: "< 2 horas",
-  location: "Zona Centro",
-};
-
-// Datos detallados simulados para cada carta de servicio
-const MOCK_DETAILS: Record<string, MockServiceDetail> = {
-  "1": DEFAULT_SERVICE,
-  "2": {
-    id: "2",
-    titleKey: "listings.mock.electricalInstall",
-    providerName: "Juan Gómez",
-    price: { amountMinor: 6000, currency: "USD" },
-    rating: 4.9,
-    category: "Electricidad",
-    descriptionKey:
-      "Instalación y mantenimiento de tableros eléctricos, cableado residencial y diagnóstico de fallas.",
-    responseTime: "< 1 hora",
-    location: "Zona Norte",
-  },
-  "3": {
-    id: "3",
-    titleKey: "listings.mock.deepCleaning",
-    providerName: "María López",
-    price: { amountMinor: 3000, currency: "USD" },
-    rating: 4.7,
-    category: "Limpieza",
-    descriptionKey:
-      "Servicio completo de limpieza profunda para casas y oficinas, incluye desinfección y productos ecológicos.",
-    responseTime: "Mismo día",
-    location: "Zona Sur",
-  },
-  "4": {
-    id: "4",
-    titleKey: "listings.mock.mathTutoring",
-    providerName: "Ana Silva",
-    price: { amountMinor: 2500, currency: "USD" },
-    rating: 5.0,
-    category: "Tutoría",
-    descriptionKey:
-      "Clases personalizadas de matemáticas para primaria, secundaria y nivel universitario.",
-    responseTime: "A convenir",
-    location: "En línea / Presencial",
-  },
-  "5": {
-    id: "5",
-    titleKey: "listings.mock.dogWalking",
-    providerName: "David Ruiz",
-    price: { amountMinor: 1500, currency: "USD" },
-    rating: 4.6,
-    category: "Mascotas",
-    descriptionKey:
-      "Paseo de perros seguro y divertido con seguimiento en tiempo real y atención personalizada.",
-    responseTime: "< 30 mins",
-    location: "Parques locales",
-  },
-  "6": {
-    id: "6",
-    titleKey: "listings.mock.drainClearing",
-    providerName: "Carlos Pérez",
-    price: { amountMinor: 5000, currency: "USD" },
-    rating: 4.7,
-    category: "Plomería",
-    descriptionKey:
-      "Destape rápido de drenajes y fregaderos con maquinaria especializada sin dañar tuberías.",
-    responseTime: "< 1 hora",
-    location: "Zona Metro",
-  },
-};
-
-/**
- * Pantalla de Detalle y Especificaciones de la Carta seleccionada
- */
 export default function ListingDetailScreen() {
   const router = useRouter();
   const { t, i18n } = useTranslation();
-  // Obtiene el ID del servicio pasado por la URL dinámica /(app)/listings/[id]
-  const { id } = useLocalSearchParams<{ id: string }>();
+  // El id viene de la ruta /(app)/listings/[id], así que siempre está presente.
+  const { id: listingId } = useLocalSearchParams<{ id: string }>();
 
-  // Busca el servicio específico o usa el servicio por defecto sin aserciones
-  const selectedService = id ? MOCK_DETAILS[id] : undefined;
-  const service: MockServiceDetail = selectedService ?? DEFAULT_SERVICE;
+  const { actor } = useSession();
+  const toErrorMessage = useApiErrorMessage();
+  const pricingLabel = usePricingLabel();
   const locale = localeForLanguage(i18n.language);
+
+  const listingQuery = useListingDetail(listingId);
+  const reviewsQuery = useListingReviews(listingId);
+  const createBooking = useCreateBooking();
+
+  const [feedback, setFeedback] = useState<string | null>(null);
+
+  if (listingQuery.isPending) {
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center bg-surface">
+        <ActivityIndicator color="#6366f1" />
+      </SafeAreaView>
+    );
+  }
+
+  if (listingQuery.isError) {
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center bg-surface px-6">
+        <Text className="text-error text-center">
+          {toErrorMessage(listingQuery.error)}
+        </Text>
+      </SafeAreaView>
+    );
+  }
+
+  const listing = listingQuery.data;
+  const reviews = (reviewsQuery.data?.pages ?? []).flatMap((page) => page.items);
+
+  // ¿Se puede reservar? La regla es la del contrato compartido con el backend.
+  const eligibility = actor === null ? null : canBookListing(actor, listing);
+  const blockedReason =
+    eligibility !== null && !eligibility.ok ? eligibility.reason : null;
+
+  const handleBook = async (): Promise<void> => {
+    setFeedback(null);
+    try {
+      // La reserva nace en estado `requested`: ahora le toca al proveedor
+      // aceptarla, así que llevamos al usuario a la lista de sus reservas.
+      await createBooking.mutateAsync({ listingId: listing.id });
+      router.push("/(app)/bookings");
+    } catch (error) {
+      setFeedback(toErrorMessage(error));
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-surface" edges={["top", "bottom"]}>
-      {/* Encabezado con navegación de regreso */}
-      <View className="flex-row items-center justify-between px-6 py-4 border-b border-default bg-surface">
+      <View className="flex-row items-center px-6 py-4 border-b border-default bg-surface">
         <TouchableOpacity
           onPress={() => router.back()}
           className="flex-row items-center p-2 -ml-2"
@@ -134,104 +88,90 @@ export default function ListingDetailScreen() {
             {t("listings.detail.back")}
           </Text>
         </TouchableOpacity>
-
-        {/* Botón de ícono para volver al Login */}
-        <TouchableOpacity
-          onPress={() => router.replace("/(auth)/sign-in")}
-          className="w-10 h-10 bg-surface-alt border border-default rounded-full items-center justify-center"
-          accessibilityLabel={t("nav.backToLogin")}
-        >
-          <LogOut size={18} color="#0f172a" />
-        </TouchableOpacity>
       </View>
 
       <ScrollView
         contentContainerStyle={{ padding: 24 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Título e información básica */}
-        <View className="mb-6">
-          <View className="bg-brand/10 self-start px-3 py-1 rounded-full mb-3">
-            <Text className="text-brand font-bold text-xs uppercase">
-              {service.category}
-            </Text>
-          </View>
-          <Text className="text-3xl font-bold text-primary mb-2">
-            {t(service.titleKey)}
+        <Text className="text-3xl font-bold text-primary mb-2">{listing.title}</Text>
+
+        <View className="flex-row items-center justify-between mt-2 mb-6">
+          <Text className="text-2xl font-bold text-brand">
+            {pricingLabel(listing.pricing, locale)}
           </Text>
 
-          <View className="flex-row items-center justify-between mt-2">
-            {/* Formato de precio estricto según la moneda */}
-            <Text className="text-2xl font-bold text-brand">
-              {formatMoney(service.price, locale)}
-            </Text>
-
+          {listing.ratingCount > 0 ? (
             <View className="flex-row items-center bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200">
               <Star size={16} color="#fbbf24" fill="#fbbf24" />
               <Text className="text-amber-800 font-bold text-sm ml-1.5">
-                {service.rating.toFixed(1)}
+                {listing.ratingAvg.toFixed(1)} ({listing.ratingCount})
               </Text>
             </View>
-          </View>
+          ) : (
+            <Text className="text-tertiary text-sm">
+              {t("listings.detail.noReviews")}
+            </Text>
+          )}
         </View>
 
-        {/* Tarjeta con las especificaciones del servicio */}
-        <View className="bg-surface-alt rounded-2xl p-5 mb-6 border border-default">
-          <Text className="text-lg font-bold text-primary mb-4">
-            {t("listings.detail.specifications")}
-          </Text>
-
-          <View className="gap-3">
-            <View className="flex-row items-center">
-              <User size={18} color="#64748b" />
-              <Text className="text-secondary text-sm ml-3 font-medium">
-                {t("listings.detail.provider")}:{" "}
-                <Text className="text-primary font-bold">{service.providerName}</Text>
-              </Text>
-            </View>
-
-            <View className="flex-row items-center">
-              <Clock size={18} color="#64748b" />
-              <Text className="text-secondary text-sm ml-3 font-medium">
-                Tiempo de respuesta:{" "}
-                <Text className="text-primary font-semibold">{service.responseTime}</Text>
-              </Text>
-            </View>
-
-            <View className="flex-row items-center">
-              <MapPin size={18} color="#64748b" />
-              <Text className="text-secondary text-sm ml-3 font-medium">
-                Ubicación:{" "}
-                <Text className="text-primary font-semibold">{service.location}</Text>
-              </Text>
-            </View>
-
-            <View className="flex-row items-center">
-              <ShieldCheck size={18} color="#16a34a" />
-              <Text className="text-emerald-700 text-sm ml-3 font-semibold">
-                Servicio verificado y garantizado por Cerca
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Descripción extensa */}
         <View className="mb-8">
           <Text className="text-lg font-bold text-primary mb-2">
             {t("listings.detail.description")}
           </Text>
           <Text className="text-secondary text-base leading-6">
-            {service.descriptionKey}
+            {listing.description}
           </Text>
         </View>
 
-        {/* Botón de acción para reservar */}
-        <Button
-          label={t("listings.detail.book")}
-          onPress={() => {
-            // Acción simulada de reserva
-          }}
-        />
+        {/* Reseñas reales del anuncio */}
+        <View className="mb-8">
+          <Text className="text-lg font-bold text-primary mb-3">
+            {t("listings.detail.reviews")}
+          </Text>
+
+          {reviews.length === 0 ? (
+            <Text className="text-tertiary">{t("listings.detail.noReviews")}</Text>
+          ) : (
+            reviews.map((review) => (
+              <View
+                key={review.id}
+                className="bg-surface-alt rounded-2xl p-4 mb-3 border border-default"
+              >
+                <View className="flex-row items-center mb-1.5">
+                  <Star size={14} color="#fbbf24" fill="#fbbf24" />
+                  <Text className="text-primary font-bold text-sm ml-1.5">
+                    {review.rating}/5
+                  </Text>
+                </View>
+                <Text className="text-secondary leading-5">{review.body}</Text>
+              </View>
+            ))
+          )}
+        </View>
+
+        {feedback !== null ? (
+          <View className="bg-red-50 border border-red-200 rounded-xl p-3.5 mb-4">
+            <Text className="text-red-700 text-xs font-semibold text-center leading-5">
+              {feedback}
+            </Text>
+          </View>
+        ) : null}
+
+        {/* Si no se puede reservar, se explica el motivo en vez de dejar un botón muerto. */}
+        {blockedReason !== null ? (
+          <View className="bg-surface-alt border border-default rounded-xl p-4">
+            <Text className="text-secondary text-center text-sm">
+              {t(`errors.reason.${blockedReason}`)}
+            </Text>
+          </View>
+        ) : (
+          <Button
+            label={t("listings.detail.book")}
+            isLoading={createBooking.isPending}
+            onPress={() => void handleBook()}
+          />
+        )}
       </ScrollView>
     </SafeAreaView>
   );

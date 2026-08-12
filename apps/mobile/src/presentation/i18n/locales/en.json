@@ -1,30 +1,39 @@
 {
   "common": {
     "brand": "Cerca",
-    "or": "or continue with",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "cancel": "Cancel"
   },
   "auth": {
     "signIn": {
-      "title": "Sign In",
-      "subtitle": "Welcome back to Cerca! Please enter your details.",
+      "title": "Sign in",
+      "subtitle": "Welcome back to Cerca! Enter your details.",
       "emailLabel": "Email",
       "emailPlaceholder": "Enter your email",
       "passwordLabel": "Password",
       "passwordPlaceholder": "Enter your password",
-      "forgotPassword": "Forgot password?",
-      "submit": "Sign In",
-      "google": "Google",
-      "apple": "Apple",
-      "noAccount": "Don't have an account?",
+      "submit": "Sign in",
+      "noAccount": "No account yet?",
       "signUpLink": "Sign up"
     },
     "signUp": {
-      "title": "Sign Up",
+      "title": "Create account",
       "subtitle": "Create your Cerca account",
-      "placeholder": "Registration form coming soon",
+      "nameLabel": "Name",
+      "namePlaceholder": "What should we call you?",
+      "passwordPlaceholder": "At least 8 characters",
+      "accountTypeLabel": "What do you want to do on Cerca?",
+      "accountType": {
+        "customer": "Hire services",
+        "provider": "Offer services"
+      },
+      "submit": "Create account",
       "hasAccount": "Already have an account?",
       "signInLink": "Sign in"
+    },
+    "errors": {
+      "emptyFields": "Please fill in every field.",
+      "passwordTooShort": "The password must be at least 8 characters long."
     }
   },
   "search": {
@@ -32,36 +41,165 @@
     "subtitle": "Find the best services near you",
     "placeholder": "Search services, professionals...",
     "empty": "No services found",
+    "distanceMeters": "{{value}} m away",
+    "distanceKm": "{{value}} km away",
     "categories": {
-      "all": "All",
-      "plumbing": "Plumbing",
-      "electrical": "Electrical",
-      "cleaning": "Cleaning",
-      "tutoring": "Tutoring",
-      "pets": "Pets"
+      "all": "All"
     }
   },
   "listings": {
-    "detail": {
-      "back": "Back to search",
-      "book": "Book service",
-      "provider": "Provider",
-      "rating": "Rating",
-      "price": "Price",
-      "description": "Service description",
-      "specifications": "Service specifications"
+    "priceOnRequest": "Price on request",
+    "pricing": {
+      "hourly": "{{amount}} / hour · {{hours}} h minimum",
+      "quoteFrom": "From {{amount}}"
     },
-    "mock": {
-      "pipeRepair": "Pipe Repair",
-      "electricalInstall": "Electrical Installation",
-      "deepCleaning": "Deep Cleaning",
-      "mathTutoring": "Math Tutoring",
-      "dogWalking": "Dog Walking",
-      "drainClearing": "Drain Clearing"
+    "status": {
+      "draft": "Draft",
+      "published": "Published",
+      "paused": "Paused",
+      "under_review": "Under review",
+      "removed": "Removed"
+    },
+    "detail": {
+      "back": "Back",
+      "book": "Book this service",
+      "description": "Service description",
+      "reviews": "Reviews",
+      "noReviews": "No reviews yet"
+    }
+  },
+  "bookings": {
+    "title": "My bookings",
+    "subtitle": "What you booked and what was booked from you",
+    "empty": "No bookings here yet",
+    "actionFailed": "The action could not be completed",
+    "scheduledFor": "Scheduled for {{date}}",
+    "roles": {
+      "customer": "I booked",
+      "provider": "Booked from me"
+    },
+    "status": {
+      "requested": "Requested",
+      "accepted": "Accepted",
+      "declined": "Declined",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "accept": {
+      "title": "Accept booking",
+      "message": "When will you provide the service?",
+      "inDays_one": "Tomorrow",
+      "inDays_other": "In {{count}} days"
+    },
+    "decline": {
+      "title": "Decline booking",
+      "message": "Why are you declining?",
+      "reasons": {
+        "unavailable": "I'm not available",
+        "not_a_fit": "Not what I offer",
+        "other": "Another reason"
+      }
+    },
+    "actions": {
+      "accept": "Accept",
+      "decline": "Decline",
+      "complete": "Mark as completed",
+      "cancel": "Cancel",
+      "review": "Write a review"
+    }
+  },
+  "reviews": {
+    "title": "Write a review",
+    "subtitle": "Tell others how this service went",
+    "ratingLabel": "Your rating",
+    "starLabel_one": "{{count}} star",
+    "starLabel_other": "{{count}} stars",
+    "bodyLabel": "Your comment",
+    "bodyPlaceholder": "How was the service?",
+    "submit": "Publish review",
+    "errors": {
+      "emptyBody": "Write a comment before publishing."
+    }
+  },
+  "provider": {
+    "title": "Provider area",
+    "actionFailed": "The action could not be completed",
+    "actions": {
+      "publish": "Publish",
+      "pause": "Pause"
+    },
+    "myListings": {
+      "title": "My listings",
+      "subtitle": "Manage the services you offer",
+      "create": "+ Create listing",
+      "empty": "You haven't created any listing yet"
+    },
+    "newListing": {
+      "title": "Create listing",
+      "subtitle": "It is saved as a draft; you decide when to publish it",
+      "categoryLabel": "Category",
+      "titleLabel": "Title",
+      "titlePlaceholder": "E.g. Pipe repair",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Explain what your service includes",
+      "pricingLabel": "How you charge",
+      "pricingModels": {
+        "fixed": "Fixed price",
+        "hourly": "Hourly",
+        "quote": "On request"
+      },
+      "amountLabel": "Amount",
+      "amountPlaceholder": "E.g. 45000",
+      "minimumHoursLabel": "Minimum hours",
+      "locationFallback": "No location permission: the listing will be published in downtown Medellín.",
+      "submit": "Create listing",
+      "errors": {
+        "noCategory": "Pick a category.",
+        "incomplete": "The title needs at least 3 characters and the description cannot be empty.",
+        "badPricing": "Check the amount. Minimum hours must be between 1 and 12."
+      }
     }
   },
   "nav": {
-    "backToLogin": "Back to Login",
-    "signOut": "Sign Out"
+    "signOut": "Sign out",
+    "bookings": "My bookings",
+    "myListings": "My listings"
+  },
+  "input": {
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
+  },
+  "errors": {
+    "unknown": "Something went wrong. Please try again.",
+    "network": "Could not reach the server. Check that the API is running and the address is correct.",
+    "reason": {
+      "not_your_booking": "This booking is not yours.",
+      "not_completed": "You can review once the service is completed.",
+      "already_reviewed": "You already reviewed this booking.",
+      "window_closed": "The 30-day window to review has closed.",
+      "own_listing": "You cannot book your own listing.",
+      "not_bookable": "This listing is not available for booking.",
+      "not_participant": "You are not part of this booking.",
+      "not_cancellable": "This booking can no longer be cancelled."
+    },
+    "code": {
+      "INVALID_CREDENTIALS": "Wrong email or password.",
+      "EMAIL_TAKEN": "An account with that email already exists.",
+      "VALIDATION_ERROR": "Some data is invalid. Please check the form.",
+      "UNAUTHENTICATED": "Your session expired. Please sign in again.",
+      "MISSING_CAPABILITY": "Your account is not allowed to do this.",
+      "ACCOUNT_SUSPENDED": "Your account is suspended.",
+      "LISTING_NOT_FOUND": "This listing no longer exists.",
+      "LISTING_REMOVED": "This listing was removed.",
+      "NOT_LISTING_OWNER": "This listing is not yours.",
+      "BOOKING_NOT_FOUND": "This booking no longer exists.",
+      "BOOKING_NOT_ALLOWED": "You cannot book this service.",
+      "INVALID_BOOKING_STATE": "The booking already changed state. Please refresh.",
+      "CANCEL_NOT_ALLOWED": "This booking can no longer be cancelled.",
+      "REVIEW_ALREADY_EXISTS": "You already reviewed this booking.",
+      "REVIEW_BLOCKED": "You cannot review this booking yet.",
+      "IDEMPOTENCY_IN_PROGRESS": "That action is already being processed. Please wait.",
+      "INTERNAL_ERROR": "The server had a problem. Please try again later."
+    }
   }
 }

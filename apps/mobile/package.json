@@ -48,7 +48,7 @@
   },
   "scripts": {
     "start": "expo start",
-    "android": "bash ./scripts/start-android.sh",
+    "android": "node ./scripts/start-android.mjs",
     "ios": "expo start --ios",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",

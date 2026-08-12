@@ -10,4 +10,6 @@
 export * from "./api/client";
 export * from "./api/auth";
 export * from "./api/listings";
+export * from "./api/bookings";
+export * from "./api/reviews";
 export * from "./storage/tokenStorage";

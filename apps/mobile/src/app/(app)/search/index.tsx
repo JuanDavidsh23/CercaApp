@@ -1,153 +1,142 @@
 import React, { useMemo, useState } from "react";
-import { View, Text, FlatList, TouchableOpacity } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
-import { LogOut } from "lucide-react-native";
+import { CalendarDays, LogOut, Briefcase } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
-import type { Money } from "@cerca/contract";
+import { can, type ListingSearchItem } from "@cerca/contract";
 import { localeForLanguage } from "@/presentation/i18n";
 import { SearchBar } from "@/presentation/components/ui/SearchBar";
 import { CategoryPills } from "@/presentation/components/ui/CategoryPills";
 import { ServiceCard } from "@/presentation/components/ui/ServiceCard";
+import { useCategories, useSearchListings } from "@/presentation/hooks/useListings";
+import { useDebouncedValue } from "@/presentation/hooks/useDebouncedValue";
+import { useDeviceLocation } from "@/presentation/hooks/useDeviceLocation";
+import { useApiErrorMessage } from "@/presentation/hooks/useApiErrorMessage";
+import { useSession } from "@/presentation/session/SessionProvider";
 
-type CategoryId = "all" | "plumbing" | "electrical" | "cleaning" | "tutoring" | "pets";
+/** Id que usamos para la píldora "Todas". No es una categoría real de la API. */
+const ALL_CATEGORIES = "all";
 
-interface MockService {
-  id: string;
-  titleKey: string;
-  providerName: string;
-  price: Money;
-  rating: number;
-  categoryId: Exclude<CategoryId, "all">;
-}
-
-const CATEGORY_IDS: readonly CategoryId[] = [
-  "all",
-  "plumbing",
-  "electrical",
-  "cleaning",
-  "tutoring",
-  "pets",
-];
-
-const CATEGORY_ID_SET: ReadonlySet<string> = new Set(CATEGORY_IDS);
-
-// Comprobación de tipo (Type Guard) para validar si una categoría es válida
-function isCategoryId(value: string): value is CategoryId {
-  return CATEGORY_ID_SET.has(value);
-}
-
-// Datos de prueba (mock) de los servicios disponibles en Cerca
-const MOCK_SERVICES: readonly MockService[] = [
-  {
-    id: "1",
-    titleKey: "listings.mock.pipeRepair",
-    providerName: "Carlos Pérez",
-    price: { amountMinor: 4500, currency: "USD" },
-    rating: 4.8,
-    categoryId: "plumbing",
-  },
-  {
-    id: "2",
-    titleKey: "listings.mock.electricalInstall",
-    providerName: "Juan Gómez",
-    price: { amountMinor: 6000, currency: "USD" },
-    rating: 4.9,
-    categoryId: "electrical",
-  },
-  {
-    id: "3",
-    titleKey: "listings.mock.deepCleaning",
-    providerName: "María López",
-    price: { amountMinor: 3000, currency: "USD" },
-    rating: 4.7,
-    categoryId: "cleaning",
-  },
-  {
-    id: "4",
-    titleKey: "listings.mock.mathTutoring",
-    providerName: "Ana Silva",
-    price: { amountMinor: 2500, currency: "USD" },
-    rating: 5.0,
-    categoryId: "tutoring",
-  },
-  {
-    id: "5",
-    titleKey: "listings.mock.dogWalking",
-    providerName: "David Ruiz",
-    price: { amountMinor: 1500, currency: "USD" },
-    rating: 4.6,
-    categoryId: "pets",
-  },
-  {
-    id: "6",
-    titleKey: "listings.mock.drainClearing",
-    providerName: "Carlos Pérez",
-    price: { amountMinor: 5000, currency: "USD" },
-    rating: 4.7,
-    categoryId: "plumbing",
-  },
-];
+/**
+ * Desde dónde se busca cuando no hay permiso de ubicación.
+ * La API acepta estas ciudades: bogota, medellin, cali, barranquilla,
+ * cartagena y bucaramanga.
+ */
+const DEFAULT_CITY_ID = "medellin";
 
 export default function SearchScreen() {
-  // Hook de navegación de Expo Router
   const router = useRouter();
   const { t, i18n } = useTranslation();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategoryId, setSelectedCategoryId] = useState<CategoryId>("all");
+  const { actor, signOut } = useSession();
+  const toErrorMessage = useApiErrorMessage();
 
-  // Memoiza la lista de categorías traducidas para evitar recálculos innecesarios
-  const categories = useMemo(
-    () =>
-      CATEGORY_IDS.map((id) => ({
-        id,
-        label: t(`search.categories.${id}`),
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>(ALL_CATEGORIES);
+
+  // Solo se busca cuando el usuario deja de escribir.
+  const debouncedQuery = useDebouncedValue(searchQuery);
+  const { location } = useDeviceLocation();
+
+  const categoriesQuery = useCategories();
+
+  const listingsQuery = useSearchListings({
+    query: debouncedQuery.trim().length > 0 ? debouncedQuery.trim() : undefined,
+    categoryId: selectedCategoryId === ALL_CATEGORIES ? undefined : selectedCategoryId,
+    lat: location?.lat,
+    lng: location?.lng,
+    // La API necesita un punto de partida sí o sí. Si el usuario no dio permiso
+    // de ubicación, se busca desde una ciudad conocida en vez de fallar.
+    cityId: location === null ? DEFAULT_CITY_ID : undefined,
+    radiusKm: 25,
+  });
+
+  // Las categorías vienen del servidor; delante ponemos "Todas".
+  const categoryPills = useMemo(
+    () => [
+      { id: ALL_CATEGORIES, label: t("search.categories.all") },
+      ...(categoriesQuery.data ?? []).map((category) => ({
+        id: category.id,
+        label: category.name,
       })),
-    [t],
+    ],
+    [categoriesQuery.data, t],
   );
 
-  // Filtra los servicios según la búsqueda de texto y la categoría seleccionada
-  const filteredServices = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-
-    return MOCK_SERVICES.filter((service) => {
-      const title = t(service.titleKey);
-      const matchesCategory =
-        selectedCategoryId === "all" || service.categoryId === selectedCategoryId;
-      const matchesSearch =
-        query.length === 0 ||
-        title.toLowerCase().includes(query) ||
-        service.providerName.toLowerCase().includes(query);
-
-      return matchesCategory && matchesSearch;
-    });
-  }, [searchQuery, selectedCategoryId, t]);
+  // `useInfiniteQuery` guarda una lista de páginas: aquí las juntamos en una sola.
+  const listings = useMemo(
+    () => (listingsQuery.data?.pages ?? []).flatMap((page) => page.items),
+    [listingsQuery.data],
+  );
 
   const locale = localeForLanguage(i18n.language);
+
+  /** "a 850 m" / "a 1,2 km", según lo lejos que esté. */
+  const distanceLabel = (meters: number): string => {
+    if (meters < 1000) {
+      return t("search.distanceMeters", { value: Math.round(meters) });
+    }
+    return t("search.distanceKm", { value: (meters / 1000).toFixed(1) });
+  };
+
+  const renderItem = ({ item }: { item: ListingSearchItem }) => (
+    <ServiceCard
+      title={item.title}
+      subtitle={distanceLabel(item.distanceMeters)}
+      price={item.priceFrom}
+      priceFallback={t("listings.priceOnRequest")}
+      rating={item.ratingAvg}
+      ratingCount={item.ratingCount}
+      locale={locale}
+      onPress={() => {
+        router.push(`/(app)/listings/${item.id}`);
+      }}
+    />
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-surface" edges={["top"]}>
       <StatusBar style="dark" />
 
       <View className="bg-surface pt-4 pb-2 px-6">
-        {/* Fila superior con título y botón de ícono para volver al Login */}
         <View className="flex-row items-center justify-between mb-4">
-          <View>
+          <View className="flex-1">
             <Text className="text-3xl font-bold text-primary mb-1">
               {t("search.title")}
             </Text>
             <Text className="text-secondary">{t("search.subtitle")}</Text>
           </View>
 
-          {/* Botón de solo ícono para salir o volver al Login de manera sencilla */}
-          <TouchableOpacity
-            onPress={() => router.replace("/(auth)/sign-in")}
-            className="w-10 h-10 bg-surface-alt border border-default rounded-full items-center justify-center"
-            accessibilityLabel={t("nav.backToLogin")}
-          >
-            <LogOut size={20} color="#0f172a" />
-          </TouchableOpacity>
+          <View className="flex-row gap-2">
+            {/* El área de proveedor solo aparece si la cuenta tiene esa capacidad.
+                Es la misma matriz de permisos que aplica el backend. */}
+            {actor !== null && can(actor, "listing:create") ? (
+              <TouchableOpacity
+                onPress={() => router.push("/(provider)/my-listings")}
+                className="w-10 h-10 bg-surface-alt border border-default rounded-full items-center justify-center"
+                accessibilityLabel={t("nav.myListings")}
+              >
+                <Briefcase size={18} color="#0f172a" />
+              </TouchableOpacity>
+            ) : null}
+
+            <TouchableOpacity
+              onPress={() => router.push("/(app)/bookings")}
+              className="w-10 h-10 bg-surface-alt border border-default rounded-full items-center justify-center"
+              accessibilityLabel={t("nav.bookings")}
+            >
+              <CalendarDays size={18} color="#0f172a" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => void signOut()}
+              className="w-10 h-10 bg-surface-alt border border-default rounded-full items-center justify-center"
+              accessibilityLabel={t("nav.signOut")}
+            >
+              <LogOut size={18} color="#0f172a" />
+            </TouchableOpacity>
+          </View>
         </View>
 
         <SearchBar
@@ -160,44 +149,53 @@ export default function SearchScreen() {
 
       <View className="bg-surface border-b border-default mb-4">
         <CategoryPills
-          categories={categories}
+          categories={categoryPills}
           selectedCategoryId={selectedCategoryId}
-          onSelect={(id) => {
-            if (isCategoryId(id)) {
-              setSelectedCategoryId(id);
-            }
-          }}
+          onSelect={setSelectedCategoryId}
         />
       </View>
 
       <View className="flex-1 bg-surface-alt pt-2">
-        {/* Lista optimizada (FlatList) para renderizar las cartas de servicios */}
-        <FlatList
-          data={filteredServices}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 24 }}
-          showsVerticalScrollIndicator={false}
-          initialNumToRender={8}
-          windowSize={7}
-          renderItem={({ item }) => (
-            <ServiceCard
-              title={t(item.titleKey)}
-              providerName={item.providerName}
-              price={item.price}
-              rating={item.rating}
-              locale={locale}
-              // Al presionar la carta, navega al componente de especificaciones detalladas
-              onPress={() => {
-                router.push(`/(app)/listings/${item.id}`);
-              }}
-            />
-          )}
-          ListEmptyComponent={
-            <View className="items-center justify-center py-10">
-              <Text className="text-tertiary">{t("search.empty")}</Text>
-            </View>
-          }
-        />
+        {listingsQuery.isPending ? (
+          <View className="items-center justify-center py-10">
+            <ActivityIndicator color="#6366f1" />
+          </View>
+        ) : listingsQuery.isError ? (
+          <View className="items-center justify-center px-6 py-10">
+            <Text className="text-error text-center">
+              {toErrorMessage(listingsQuery.error)}
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={listings}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 24 }}
+            showsVerticalScrollIndicator={false}
+            initialNumToRender={8}
+            windowSize={7}
+            // Al llegar al final se pide la página siguiente por cursor.
+            onEndReachedThreshold={0.5}
+            onEndReached={() => {
+              if (listingsQuery.hasNextPage && !listingsQuery.isFetchingNextPage) {
+                void listingsQuery.fetchNextPage();
+              }
+            }}
+            refreshing={listingsQuery.isRefetching}
+            onRefresh={() => void listingsQuery.refetch()}
+            ListFooterComponent={
+              listingsQuery.isFetchingNextPage ? (
+                <ActivityIndicator className="py-4" color="#6366f1" />
+              ) : null
+            }
+            ListEmptyComponent={
+              <View className="items-center justify-center py-10">
+                <Text className="text-tertiary">{t("search.empty")}</Text>
+              </View>
+            }
+          />
+        )}
       </View>
     </SafeAreaView>
   );
