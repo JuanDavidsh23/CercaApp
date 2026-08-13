@@ -6,3 +6,10 @@
  */
 export type Eligibility<Reason extends string> =
   { ok: true } | { ok: false; reason: Reason };
+
+/**
+ * Ensures that all cases in a discriminated union or switch statement are handled.
+ */
+export function assertNever(value: never): never {
+  throw new Error(`Unhandled discriminated union member: ${JSON.stringify(value)}`);
+}

@@ -1,10 +1,18 @@
 import { z } from "zod";
 
 /**
- * Money is ALWAYS integer minor units + an ISO-4217 currency code. Never a float:
- * `0.1 + 0.2 !== 0.3`, and "divide by 100" is wrong in general — the Colombian peso
- * has 0 decimals, the Kuwaiti dinar has 3. The server never formats or divides money;
- * it emits `{ amountMinor, currency }` and the client renders it for its locale.
+ * Manejo del Dinero en CercaApp:
+ *
+ * ¿Por qué NUNCA se usan números de punto flotante (`float`) para dinero?
+ * 1. Imprecisión binaria de punto flotante: en IEEE 754, `0.1 + 0.2` da `0.30000000000000004`, provocando errores de centavos.
+ * 2. Suposición de 2 decimales universal: Dividir entre 100 de forma genérica es incorrecto globalmente.
+ *    - El Peso Colombiano (COP), Chileno (CLP) y Yen Japonés (JPY) tienen 0 decimales (unidades menores = 0).
+ *    - El Dinar Kuwaití (KWD) tiene 3 decimales (unidades menores = 3).
+ *    - El Dólar (USD) y Euro (EUR) tienen 2 decimales (unidades menores = 2).
+ *
+ * La regla de oro (Regla 4 y 5 de AGENTS.md):
+ * El dinero SIEMPRE viaja por el API como `{ amountMinor: entero, currency: "USD" }`.
+ * El servidor almacena y transmite enteros enteros; solo el cliente móvil le aplica formato para la UI según el locale local.
  */
 export const CURRENCY_MINOR_UNITS: Readonly<Record<string, number>> = Object.freeze({
   COP: 0,
@@ -18,6 +26,7 @@ export const CURRENCY_MINOR_UNITS: Readonly<Record<string, number>> = Object.fre
   KWD: 3,
 });
 
+/** Esquema Zod estricto para validar cualquier objeto de Dinero recibido por la API. */
 export const moneySchema = z
   .object({
     amountMinor: z.number().int().nonnegative(),
@@ -30,17 +39,18 @@ export const moneySchema = z
 
 export type Money = z.infer<typeof moneySchema>;
 
-/**
- * Minor-unit exponent for a currency (how many minor units make one major unit).
- * Reference metadata for clients; the server does not use it to format money.
- * Unknown currencies default to 2.
- */
+/** Devuelve cuántos decimales / exponentes de unidad menor usa una moneda dada. */
 export function minorUnitsFor(currency: string): number {
   return CURRENCY_MINOR_UNITS[currency] ?? 2;
 }
 
 /**
- * Formats a Money object into a localized currency string according to ISO-4217 minor units.
+ * Formatea un objeto `Money` a un texto formateado según el locale (ej. "$ 15.000" o "$150.00").
+ *
+ * Pasos:
+ * 1. Obtiene los decimales según la moneda (ej. 2 para MXN/USD, 0 para JPY/COP).
+ * 2. Convierte `amountMinor` dividiendo por 10^minorUnits para obtener el monto principal.
+ * 3. Aplica `Intl.NumberFormat` nativo con la moneda y los decimales exactos.
  */
 export function formatMoney(money: Money, locale: string = "es-MX"): string {
   const minorUnits = minorUnitsFor(money.currency);

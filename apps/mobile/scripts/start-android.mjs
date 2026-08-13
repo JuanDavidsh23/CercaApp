@@ -32,6 +32,7 @@ if (!existsSync(platformTools)) {
 
 const env = {
   ...process.env,
+  EXPO_NO_DEVTOOLS: process.env.EXPO_NO_DEVTOOLS ?? "1",
   ANDROID_HOME: sdkRoot,
   ANDROID_SDK_ROOT: sdkRoot,
   PATH: `${process.env.PATH ?? ""}${delimiter}${platformTools}${delimiter}${join(sdkRoot, "emulator")}`,
@@ -46,10 +47,16 @@ spawnSync(join(platformTools, "adb"), ["reverse", "tcp:8081", "tcp:8081"], {
   stdio: "ignore",
 });
 
-const result = spawnSync(
-  "pnpm",
-  ["exec", "expo", "start", "--android", ...process.argv.slice(2)],
-  { env, stdio: "inherit", shell: process.platform === "win32" },
+const userArgs = process.argv.slice(2);
+const hasTargetFlag = userArgs.some(
+  (arg) => arg === "--go" || arg === "--dev-client" || arg === "-g" || arg === "-d",
 );
+const flags = hasTargetFlag ? userArgs : ["--go", ...userArgs];
+
+const result = spawnSync("pnpm", ["exec", "expo", "start", "--android", ...flags], {
+  env,
+  stdio: "inherit",
+  shell: process.platform === "win32",
+});
 
 process.exit(result.status ?? 1);

@@ -14,12 +14,19 @@ export interface BookingActions {
 }
 
 /**
- * Decide qué acciones mostrar, combinando las mismas capas que usa el servidor:
- * la CAPACIDAD (`can(actor, "booking:accept")`), la RELACIÓN (soy el cliente o el
- * proveedor) y el ESTADO de la reserva.
+ * `bookingActionsFor`: Adaptador de la Capa de Aplicación.
  *
- * Ojo: esto es solo estética. Si alguien fuerza la petición igualmente, la API la
- * rechaza. Ocultar un botón nunca es una medida de seguridad.
+ * ¿Qué hace esta función?
+ * Calcula qué botones (Aceptar, Rechazar, Completar, Cancelar, Reseñar) deben pintarse en la UI para una reserva dada.
+ *
+ * ¿Cómo combina las 3 verificaciones?
+ * 1. Capacidad: `can(actor, "booking:accept")` -> Verifica si el actor tiene capacidad de proveedor.
+ * 2. Relación: `role === "provider"` o `"customer"` -> Si el usuario actual es quien presta el servicio o quien lo solicitó.
+ * 3. Estado: `booking.status` -> Transición de máquina de estados (`requested` -> `accepted` -> `completed` / `declined` / `cancelled`).
+ *
+ * NOTA IMPORTANTE (Regla 8 de AGENTS.md):
+ * Ocultar un botón en la app móvil es SOLO para experiencia de usuario (UX).
+ * La verdadera autorización de seguridad se realiza en el Servidor (Backend).
  */
 export function bookingActionsFor(
   actor: Actor,
@@ -30,14 +37,19 @@ export function bookingActionsFor(
   const isProvider = role === "provider";
   const mayAccept = isProvider && can(actor, "booking:accept");
 
-  // Solo se puede cancelar mientras la reserva sigue viva.
+  // La reserva puede cancelarse mientras no haya finalizado ni sido rechazada
   const isOpen = booking.status === "requested" || booking.status === "accepted";
 
   return {
+    // 1. Aceptar: Solo el proveedor si la reserva está en estado 'requested'
     canAccept: mayAccept && booking.status === "requested",
+    // 2. Rechazar: Solo el proveedor si la reserva está en estado 'requested'
     canDecline: mayAccept && booking.status === "requested",
+    // 3. Completar: Solo el proveedor una vez aceptó el servicio y lo ejecutó
     canComplete: mayAccept && booking.status === "accepted",
+    // 4. Cancelar: El cliente o proveedor mientras la reserva esté abierta
     canCancel: isOpen,
+    // 5. Reseñar: Solo el cliente si la política `canWriteReview` da ok (completada, no reseñada, <= 30 días)
     canReview: !isProvider && canWriteReview(actor, booking, now).ok,
   };
 }

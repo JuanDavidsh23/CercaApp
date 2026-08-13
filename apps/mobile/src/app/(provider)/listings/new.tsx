@@ -1,7 +1,15 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, TextInput, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  TextInput,
+  ActivityIndicator,
+  TouchableOpacity,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { ArrowLeft } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import type { CreateListingInput, Pricing } from "@cerca/contract";
 import { Input } from "@/presentation/components/ui/Input";
@@ -113,6 +121,20 @@ export default function NewListingScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-surface" edges={["top", "bottom"]}>
+      {/* Cabecera superior con botón para regresar */}
+      <View className="flex-row items-center px-6 py-4 border-b border-default bg-surface">
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="flex-row items-center p-2 -ml-2"
+          accessibilityLabel={t("listings.detail.back")}
+        >
+          <ArrowLeft size={20} color="#0f172a" />
+          <Text className="text-sm font-semibold text-primary ml-1">
+            {t("listings.detail.back")}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       <ScrollView
         contentContainerStyle={{ padding: 24 }}
         keyboardShouldPersistTaps="handled"

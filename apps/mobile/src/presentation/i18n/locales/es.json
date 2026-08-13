@@ -65,7 +65,16 @@
       "book": "Reservar servicio",
       "description": "Descripción del servicio",
       "reviews": "Reseñas",
-      "noReviews": "Todavía no tiene reseñas"
+      "noReviews": "Todavía no tiene reseñas",
+      "highlightsTitle": "Garantías y ventajas del servicio",
+      "guarantee": "Garantía de servicio",
+      "guaranteeSub": "Protección y soporte en tu contratación",
+      "verified": "Profesional verificado",
+      "verifiedSub": "Identidad y antecedentes validados",
+      "fastResponse": "Respuesta rápida",
+      "fastResponseSub": "Atención eficiente en menos de 24h",
+      "securePayment": "Pago seguro",
+      "securePaymentSub": "Transacción 100% protegida"
     }
   },
   "bookings": {
@@ -112,6 +121,13 @@
     "title": "Escribir una reseña",
     "subtitle": "Cuenta cómo te fue con este servicio",
     "ratingLabel": "Tu calificación",
+    "ratingWord": {
+      "1": "Pésimo",
+      "2": "Regular",
+      "3": "Bueno",
+      "4": "Muy bueno",
+      "5": "¡Excelente!"
+    },
     "starLabel_one": "{{count}} estrella",
     "starLabel_other": "{{count}} estrellas",
     "bodyLabel": "Tu comentario",

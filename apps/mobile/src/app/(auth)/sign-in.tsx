@@ -9,17 +9,29 @@ import { Button } from "@/presentation/components/ui/Button";
 import { useApiErrorMessage } from "@/presentation/hooks/useApiErrorMessage";
 import { useSession } from "@/presentation/session/SessionProvider";
 
+/**
+ * Pantalla `SignInScreen`: Permite iniciar sesión con correo y contraseña.
+ */
 export default function SignInScreen() {
   const { t } = useTranslation();
   const { signIn } = useSession();
   const toErrorMessage = useApiErrorMessage();
 
+  // Estados locales para los campos del formulario
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  /**
+   * Procesa el inicio de sesión.
+   *
+   * ¿Cómo redirige tras el login?
+   * No se usa `router.push`: al completarse el login en `useSession`, se actualiza el objeto `actor`.
+   * El layout reactivo de `(auth)/_layout.tsx` detecta el `actor !== null` y redirige automáticamente a `/(app)/search`.
+   */
   const handleSignIn = async (): Promise<void> => {
+    // Validaciones locales previas al envío
     if (email.trim().length === 0 || password.length === 0) {
       setErrorMessage(t("auth.errors.emptyFields"));
       return;
@@ -30,8 +42,8 @@ export default function SignInScreen() {
 
     try {
       await signIn({ email: email.trim(), password });
-      // No navegamos a mano: al haber sesión, el layout de (auth) redirige solo.
     } catch (error) {
+      // Traduce errores RFC 9457 o de conexión a mensajes i18n comprensibles
       setErrorMessage(toErrorMessage(error));
     } finally {
       setIsLoading(false);
@@ -40,6 +52,7 @@ export default function SignInScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-surface" edges={["top", "bottom"]}>
+      {/* Evita que el teclado virtual tape los botones e inputs en iOS y Android */}
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -53,6 +66,7 @@ export default function SignInScreen() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
+          {/* Cabecera con Título y Subtítulo traducidos con i18n */}
           <View className="mt-12 mb-10">
             <Text className="text-4xl font-bold text-primary mb-2">
               {t("auth.signIn.title")}
@@ -60,6 +74,7 @@ export default function SignInScreen() {
             <Text className="text-secondary text-base">{t("auth.signIn.subtitle")}</Text>
           </View>
 
+          {/* Muestra alerta de error devuelta por la API si existe */}
           {errorMessage !== null ? (
             <View className="bg-red-50 border border-red-200 rounded-xl p-3.5 mb-4">
               <Text className="text-red-700 text-xs font-semibold text-center leading-5">
@@ -68,6 +83,7 @@ export default function SignInScreen() {
             </View>
           ) : null}
 
+          {/* Campos del formulario */}
           <View className="mb-6">
             <Input
               label={t("auth.signIn.emailLabel")}
@@ -99,6 +115,7 @@ export default function SignInScreen() {
             />
           </View>
 
+          {/* Enlace para ir al registro */}
           <View className="flex-row justify-center mt-auto pt-4">
             <Text className="text-secondary">{t("auth.signIn.noAccount")} </Text>
             <Link href="/(auth)/sign-up">

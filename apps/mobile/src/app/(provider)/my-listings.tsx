@@ -1,7 +1,15 @@
 import React from "react";
-import { View, Text, FlatList, ActivityIndicator, Alert } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  ActivityIndicator,
+  Alert,
+  TouchableOpacity,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { ArrowLeft } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import type { ListingResponse } from "@cerca/contract";
 import { localeForLanguage } from "@/presentation/i18n";
@@ -60,6 +68,17 @@ export default function MyListingsScreen() {
   return (
     <SafeAreaView className="flex-1 bg-surface-alt" edges={["top"]}>
       <View className="bg-surface px-6 pt-4 pb-4 border-b border-default">
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="flex-row items-center mb-3 -ml-2 p-1"
+          accessibilityLabel={t("listings.detail.back")}
+        >
+          <ArrowLeft size={20} color="#0f172a" />
+          <Text className="text-sm font-semibold text-primary ml-1">
+            {t("listings.detail.back")}
+          </Text>
+        </TouchableOpacity>
+
         <Text className="text-3xl font-bold text-primary mb-1">
           {t("provider.myListings.title")}
         </Text>
@@ -67,7 +86,7 @@ export default function MyListingsScreen() {
 
         <Button
           label={t("provider.myListings.create")}
-          onPress={() => router.push("/(provider)/listings/new")}
+          onPress={() => router.push("/listings/new")}
         />
       </View>
 

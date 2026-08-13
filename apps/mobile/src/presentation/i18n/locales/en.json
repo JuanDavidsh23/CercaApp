@@ -65,7 +65,16 @@
       "book": "Book this service",
       "description": "Service description",
       "reviews": "Reviews",
-      "noReviews": "No reviews yet"
+      "noReviews": "No reviews yet",
+      "highlightsTitle": "Guarantees & Service Benefits",
+      "guarantee": "Service Guarantee",
+      "guaranteeSub": "Protection & support for your booking",
+      "verified": "Verified Professional",
+      "verifiedSub": "Identity & background checked",
+      "fastResponse": "Fast Response",
+      "fastResponseSub": "Efficient response within 24h",
+      "securePayment": "Secure Payment",
+      "securePaymentSub": "100% protected transaction"
     }
   },
   "bookings": {
@@ -112,6 +121,13 @@
     "title": "Write a review",
     "subtitle": "Tell others how this service went",
     "ratingLabel": "Your rating",
+    "ratingWord": {
+      "1": "Terrible",
+      "2": "Fair",
+      "3": "Good",
+      "4": "Very Good",
+      "5": "Excellent!"
+    },
     "starLabel_one": "{{count}} star",
     "starLabel_other": "{{count}} stars",
     "bodyLabel": "Your comment",

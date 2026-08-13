@@ -1,9 +1,20 @@
-import { Redirect } from "expo-router";
+import { useRouter } from "expo-router";
+import { useEffect } from "react";
+import { ActivityIndicator, View } from "react-native";
 
 /**
  * Root index — redirects to the search screen by default.
- * In Phase 3, this will check auth state and redirect accordingly.
  */
 export default function RootIndex() {
-  return <Redirect href="/(app)/search" />;
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace("/search");
+  }, [router]);
+
+  return (
+    <View className="flex-1 items-center justify-center bg-surface">
+      <ActivityIndicator color="#6366f1" />
+    </View>
+  );
 }

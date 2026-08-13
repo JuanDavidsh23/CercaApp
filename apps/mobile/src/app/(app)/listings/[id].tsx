@@ -20,10 +20,13 @@ import { usePricingLabel } from "@/presentation/hooks/usePricingLabel";
 import { useApiErrorMessage } from "@/presentation/hooks/useApiErrorMessage";
 import { useSession } from "@/presentation/session/SessionProvider";
 
+/**
+ * Pantalla `ListingDetailScreen`: Muestra el detalle completo de un anuncio (precio, descripción, reseñas) y el botón de reservar.
+ */
 export default function ListingDetailScreen() {
   const router = useRouter();
   const { t, i18n } = useTranslation();
-  // El id viene de la ruta /(app)/listings/[id], así que siempre está presente.
+  // Obtiene el ID dinámico de la ruta `/(app)/listings/[id]`
   const { id: listingId } = useLocalSearchParams<{ id: string }>();
 
   const { actor } = useSession();
@@ -31,12 +34,14 @@ export default function ListingDetailScreen() {
   const pricingLabel = usePricingLabel();
   const locale = localeForLanguage(i18n.language);
 
+  // Consultas paralelas a la API con TanStack Query
   const listingQuery = useListingDetail(listingId);
   const reviewsQuery = useListingReviews(listingId);
   const createBooking = useCreateBooking();
 
   const [feedback, setFeedback] = useState<string | null>(null);
 
+  // Muestra loader giratorio mientras carga la información del anuncio
   if (listingQuery.isPending) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-surface">
@@ -45,6 +50,7 @@ export default function ListingDetailScreen() {
     );
   }
 
+  // Muestra error si la petición falló
   if (listingQuery.isError) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-surface px-6">
@@ -58,17 +64,21 @@ export default function ListingDetailScreen() {
   const listing = listingQuery.data;
   const reviews = (reviewsQuery.data?.pages ?? []).flatMap((page) => page.items);
 
-  // ¿Se puede reservar? La regla es la del contrato compartido con el backend.
+  /**
+   * Evaluación de Elegibilidad para Reservar (`canBookListing`):
+   * Ejecuta las políticas del contrato compartido. Si el usuario es el mismo dueño del anuncio,
+   * `canBookListing` retorna `{ ok: false, reason: "cannot_book_own_listing" }`.
+   */
   const eligibility = actor === null ? null : canBookListing(actor, listing);
   const blockedReason =
     eligibility !== null && !eligibility.ok ? eligibility.reason : null;
 
+  /** Solicita la reserva vía POST /bookings con la cabecera Idempotency-Key */
   const handleBook = async (): Promise<void> => {
     setFeedback(null);
     try {
-      // La reserva nace en estado `requested`: ahora le toca al proveedor
-      // aceptarla, así que llevamos al usuario a la lista de sus reservas.
       await createBooking.mutateAsync({ listingId: listing.id });
+      // Redirige al listado de reservas tras solicitarla exitosamente
       router.push("/(app)/bookings");
     } catch (error) {
       setFeedback(toErrorMessage(error));
@@ -77,6 +87,7 @@ export default function ListingDetailScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-surface" edges={["top", "bottom"]}>
+      {/* Cabecera superior con botón para regresar */}
       <View className="flex-row items-center px-6 py-4 border-b border-default bg-surface">
         <TouchableOpacity
           onPress={() => router.back()}
@@ -94,6 +105,7 @@ export default function ListingDetailScreen() {
         contentContainerStyle={{ padding: 24 }}
         showsVerticalScrollIndicator={false}
       >
+        {/* Título y Precio formateado según tipo de cobro (fijo, por hora, a convenir) */}
         <Text className="text-3xl font-bold text-primary mb-2">{listing.title}</Text>
 
         <View className="flex-row items-center justify-between mt-2 mb-6">
@@ -115,6 +127,7 @@ export default function ListingDetailScreen() {
           )}
         </View>
 
+        {/* Descripción del Servicio */}
         <View className="mb-8">
           <Text className="text-lg font-bold text-primary mb-2">
             {t("listings.detail.description")}
@@ -124,7 +137,7 @@ export default function ListingDetailScreen() {
           </Text>
         </View>
 
-        {/* Reseñas reales del anuncio */}
+        {/* Sección de Reseñas de Clientes */}
         <View className="mb-8">
           <Text className="text-lg font-bold text-primary mb-3">
             {t("listings.detail.reviews")}
@@ -150,6 +163,7 @@ export default function ListingDetailScreen() {
           )}
         </View>
 
+        {/* Mensaje de retroalimentación de error si falla la mutación de reserva */}
         {feedback !== null ? (
           <View className="bg-red-50 border border-red-200 rounded-xl p-3.5 mb-4">
             <Text className="text-red-700 text-xs font-semibold text-center leading-5">
@@ -158,7 +172,9 @@ export default function ListingDetailScreen() {
           </View>
         ) : null}
 
-        {/* Si no se puede reservar, se explica el motivo en vez de dejar un botón muerto. */}
+        {/* Renderizado condicional según políticas:
+            Si el usuario no puede reservar (ej. es su propio anuncio), muestra la razón traducida.
+            Si puede reservar, muestra el botón de Reservar. */}
         {blockedReason !== null ? (
           <View className="bg-surface-alt border border-default rounded-xl p-4">
             <Text className="text-secondary text-center text-sm">

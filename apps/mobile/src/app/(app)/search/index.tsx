@@ -26,33 +26,39 @@ const ALL_CATEGORIES = "all";
  */
 const DEFAULT_CITY_ID = "medellin";
 
+/**
+ * Pantalla Principal `SearchScreen`: Búsqueda de servicios "Cerca de Mí" ordenados por geolocalización.
+ */
 export default function SearchScreen() {
   const router = useRouter();
   const { t, i18n } = useTranslation();
   const { actor, signOut } = useSession();
   const toErrorMessage = useApiErrorMessage();
 
+  // Estado del texto del buscador y categoría seleccionada
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>(ALL_CATEGORIES);
 
-  // Solo se busca cuando el usuario deja de escribir.
+  // 1. Debounce: Espera 300ms tras dejar de escribir antes de enviar la consulta al servidor (Optimización de red)
   const debouncedQuery = useDebouncedValue(searchQuery);
+
+  // 2. Ubicación GPS: Pide permisos y obtiene lat/lng del dispositivo
   const { location } = useDeviceLocation();
 
   const categoriesQuery = useCategories();
 
+  // 3. Consulta Paginada a la API (`useSearchListings`):
+  // Si no hay GPS activo (`location === null`), se envía `cityId: "medellin"` como fallback para evitar el error 422 LOCATION_REQUIRED.
   const listingsQuery = useSearchListings({
     query: debouncedQuery.trim().length > 0 ? debouncedQuery.trim() : undefined,
     categoryId: selectedCategoryId === ALL_CATEGORIES ? undefined : selectedCategoryId,
     lat: location?.lat,
     lng: location?.lng,
-    // La API necesita un punto de partida sí o sí. Si el usuario no dio permiso
-    // de ubicación, se busca desde una ciudad conocida en vez de fallar.
     cityId: location === null ? DEFAULT_CITY_ID : undefined,
     radiusKm: 25,
   });
 
-  // Las categorías vienen del servidor; delante ponemos "Todas".
+  // Une las categorías recibidas de la API agregando "Todas" al inicio
   const categoryPills = useMemo(
     () => [
       { id: ALL_CATEGORIES, label: t("search.categories.all") },
@@ -64,7 +70,7 @@ export default function SearchScreen() {
     [categoriesQuery.data, t],
   );
 
-  // `useInfiniteQuery` guarda una lista de páginas: aquí las juntamos en una sola.
+  // Aplana todas las páginas recibidas por el cursor en un solo arreglo plano para la FlatList
   const listings = useMemo(
     () => (listingsQuery.data?.pages ?? []).flatMap((page) => page.items),
     [listingsQuery.data],
@@ -72,7 +78,7 @@ export default function SearchScreen() {
 
   const locale = localeForLanguage(i18n.language);
 
-  /** "a 850 m" / "a 1,2 km", según lo lejos que esté. */
+  /** Formatea la distancia calculada por la API (ej. "a 850 m" o "a 1.2 km") */
   const distanceLabel = (meters: number): string => {
     if (meters < 1000) {
       return t("search.distanceMeters", { value: Math.round(meters) });
@@ -80,6 +86,7 @@ export default function SearchScreen() {
     return t("search.distanceKm", { value: (meters / 1000).toFixed(1) });
   };
 
+  /** Renderiza cada elemento de la lista con memoización mediante ServiceCard */
   const renderItem = ({ item }: { item: ListingSearchItem }) => (
     <ServiceCard
       title={item.title}
@@ -109,8 +116,8 @@ export default function SearchScreen() {
           </View>
 
           <View className="flex-row gap-2">
-            {/* El área de proveedor solo aparece si la cuenta tiene esa capacidad.
-                Es la misma matriz de permisos que aplica el backend. */}
+            {/* Evaluación de Permisos Capa 1 (`can(actor, "listing:create")`):
+                Muestra el botón de "Mis Anuncios" solo si la cuenta tiene capacidad de Proveedor. */}
             {actor !== null && can(actor, "listing:create") ? (
               <TouchableOpacity
                 onPress={() => router.push("/(provider)/my-listings")}

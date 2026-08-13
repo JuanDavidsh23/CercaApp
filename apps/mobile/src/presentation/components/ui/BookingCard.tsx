@@ -5,7 +5,7 @@ import type { BookingResponse } from "@cerca/contract";
 import { useListingDetail } from "../../hooks/useListings";
 import { cn } from "../../lib/cn";
 
-/** Fondo de la etiqueta de estado, uno por cada estado del contrato. */
+/** Fondo de la etiqueta de estado (badge), mapeado a los estados del contrato compartido (`@cerca/contract`) */
 const STATUS_BACKGROUND: Record<BookingResponse["status"], string> = {
   requested: "bg-brand/10",
   accepted: "bg-emerald-50",
@@ -14,7 +14,7 @@ const STATUS_BACKGROUND: Record<BookingResponse["status"], string> = {
   cancelled: "bg-surface-alt",
 };
 
-/** Color del texto de esa misma etiqueta. */
+/** Color del texto de la etiqueta según el estado de la reserva */
 const STATUS_TEXT: Record<BookingResponse["status"], string> = {
   requested: "text-brand",
   accepted: "text-emerald-700",
@@ -25,20 +25,25 @@ const STATUS_TEXT: Record<BookingResponse["status"], string> = {
 
 export interface BookingCardProps {
   booking: BookingResponse;
-  /** Botones de acción, que decide la pantalla. */
+  /** Botones de acción dinámicos renderizados según las políticas del contrato */
   children?: React.ReactNode;
 }
 
+/**
+ * Componente `BookingCardComponent`: Renderiza una tarjeta de reserva.
+ *
+ * ¿Cómo obtiene el título del anuncio?
+ * La reserva viene de la API con `listingId`. Se invoca `useListingDetail(listingId)` de TanStack Query.
+ * Gracias a la caché compartida, si hay 5 reservas del mismo anuncio, solo realiza **1 petición HTTP**.
+ */
 function BookingCardComponent({ booking, children }: BookingCardProps) {
   const { t } = useTranslation();
 
-  // La API devuelve la reserva con el `listingId`, no con el anuncio dentro,
-  // así que el título se pide aparte. TanStack Query lo cachea: si dos reservas
-  // son del mismo anuncio, solo se pide una vez.
   const listingQuery = useListingDetail(booking.listingId);
 
   return (
     <View className="bg-surface rounded-2xl p-4 mb-4 border border-default">
+      {/* 1. Cabecera con título del servicio y distintivo (Badge) de Estado */}
       <View className="flex-row items-start justify-between mb-2">
         <Text className="text-primary font-bold text-base flex-1 mr-3" numberOfLines={2}>
           {listingQuery.data?.title ?? t("common.loading")}
@@ -51,6 +56,7 @@ function BookingCardComponent({ booking, children }: BookingCardProps) {
         </View>
       </View>
 
+      {/* 2. Fecha programada para la prestación del servicio si ya fue aceptada */}
       {booking.scheduledFor !== null ? (
         <Text className="text-secondary text-sm mb-1">
           {t("bookings.scheduledFor", {
@@ -59,6 +65,7 @@ function BookingCardComponent({ booking, children }: BookingCardProps) {
         </Text>
       ) : null}
 
+      {/* 3. Renderiza las acciones permitidas (Aceptar, Rechazar, Completar, Cancelar, Reseñar) */}
       {children !== undefined ? (
         <View className="flex-row flex-wrap gap-2 mt-3">{children}</View>
       ) : null}
@@ -66,4 +73,7 @@ function BookingCardComponent({ booking, children }: BookingCardProps) {
   );
 }
 
+/**
+ * Se exporta envuelto en `React.memo` para evitar re-renderizados innecesarios en la `FlatList` (Regla 12 de AGENTS.md).
+ */
 export const BookingCard = React.memo(BookingCardComponent);

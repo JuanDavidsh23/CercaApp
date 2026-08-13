@@ -1,18 +1,21 @@
-import { Redirect, Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useSession } from "@/presentation/session/SessionProvider";
 
 /**
  * Pantallas de entrada (iniciar sesión / registro).
- * Si ya hay sesión no tiene sentido mostrarlas: vamos directo a la búsqueda.
  */
 export default function AuthLayout() {
   const { t } = useTranslation();
   const { actor, isLoading } = useSession();
+  const router = useRouter();
 
-  if (!isLoading && actor !== null) {
-    return <Redirect href="/(app)/search" />;
-  }
+  useEffect(() => {
+    if (!isLoading && actor !== null) {
+      router.replace("/search");
+    }
+  }, [actor, isLoading, router]);
 
   return (
     <Stack

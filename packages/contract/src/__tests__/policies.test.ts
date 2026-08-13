@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { canReviewBooking, REVIEW_WINDOW_DAYS } from "../policies";
 import { Actor } from "../actor";
-import { BookingStatus } from "../status";
+import { Booking, BookingStatus } from "../status";
 
 const createActor = (id: string): Actor => ({
   id,
@@ -14,11 +14,12 @@ const createBooking = (
   customerId: string,
   status: BookingStatus,
   hasReview: boolean = false,
-) => ({
+): Booking => ({
   id,
+  listingId: "listing_1",
   customerId,
   status,
-  hasReview,
+  reviewId: hasReview ? "review_1" : null,
 });
 
 describe("Policies: canReviewBooking", () => {

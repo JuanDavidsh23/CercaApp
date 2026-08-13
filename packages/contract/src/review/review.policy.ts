@@ -15,16 +15,18 @@ export function daysBetween(from: Date, to: Date): number {
 }
 
 /**
- * The star function. You cannot review a booking unless:
- *   · you were the one who booked it        (relation)   → not_your_booking
- *   · the booking is completed              (state)      → not_completed
- *   · you have not already reviewed it      (uniqueness) → already_reviewed
- *   · fewer than 30 days have passed        (time)       → window_closed
+ * Política `canReviewBooking`: Regla de Dominio pura para calificar reservas.
  *
- * Four conditions of four different kinds, and no role resolves them. It returns a machine
- * reason (mapped into problem+json), not a boolean, and `now` is a parameter so the
- * "window closed" test passes a date instead of faking a clock. This exact file is the one
- * the API imports at the review endpoint — the mobile app imports the same one.
+ * ¿Qué evalúa?
+ * 1. Relación: `booking.customerId === actor.id` -> Solo quien reservó puede calificar (not_your_booking).
+ * 2. Estado: `booking.status.kind === "completed"` -> Solo reservas completadas (not_completed).
+ * 3. Unicidad: `booking.reviewId === null` -> Impide múltiples reseñas a la misma reserva (already_reviewed).
+ * 4. Ventana de Tiempo: `<= 30 días` transcurridos desde completada (window_closed).
+ *
+ * ¿Por qué `now` es un argumento en lugar de llamar `new Date()` adentro?
+ * Para mantener la función PURA y DETERMINISTA. Esto permite hacer testing fácil con cualquier fecha sin falsificar el reloj del sistema.
+ *
+ * Devuelve un objeto `{ ok: true }` o `{ ok: false, reason: "razon_tecnica" }`, que la app móvil traduce usando i18n (`errors.reason.window_closed`).
  */
 export function canReviewBooking(
   actor: Actor,

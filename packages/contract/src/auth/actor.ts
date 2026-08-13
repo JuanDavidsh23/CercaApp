@@ -26,3 +26,8 @@ export function can(actor: Actor, permission: Permission): boolean {
   const fromRole = PLATFORM_PERMISSIONS[actor.platformRole].includes(permission);
   return fromCapacities || fromRole;
 }
+
+/** Checks whether the actor holds a specific capacity (customer or provider). */
+export function has(actor: Actor, capacity: Capacity): boolean {
+  return actor.capacities.includes(capacity);
+}
